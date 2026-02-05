@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Kataster-Sorter
-Comment=PDF-Sortierung für Liegenschaftskataster
-Exec=bash -c 'cd /home/sven/Dokumente/Kataster && ./Kataster-Sorter.sh'
-Icon=application-pdf
-Terminal=true
-Type=Application
-Categories=Office;
