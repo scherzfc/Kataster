@@ -1,19 +1,18 @@
 # Kataster-Sorter
 
-PDF-Analyse-App für Liegenschaftskataster-Auszüge. Sortiert Seiten nach Fortführungsfallnummer und Grundbuchblatt.
+PDF-Sortierung für Liegenschaftskataster-Auszüge.
 
-## Installation
+## Installation & Start
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+### Windows
+1. Python installieren: https://www.python.org/downloads/
+2. **Doppelklick auf `Kataster-Sorter.bat`**
 
-## Starten
+### Linux/Mac
+1. Terminal öffnen im Ordner
+2. `./Kataster-Sorter.sh`
 
-```bash
-streamlit run app.py
-```
+Beim ersten Start werden automatisch alle Abhängigkeiten installiert. Danach öffnet sich die App im Browser unter http://localhost:8501
 
-Öffne http://localhost:8501
+## Offline nutzen
+Die App läuft komplett lokal – kein Internet nötig nach der ersten Installation.
