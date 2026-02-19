@@ -1,4 +1,4 @@
-pdfplumber>=0.10.0
-pypdf>=3.17.0
-customtkinter>=5.2.0
-reportlab>=4.0.0
+streamlit
+pdfplumber
+pypdf
+reportlab
