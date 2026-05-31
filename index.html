@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaffeekasse</title>
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --card: #ffffff;
+    --ink: #2b2520;
+    --muted: #8a8175;
+    --line: #e6e0d7;
+    --accent: #8b5e34;
+    --accent-dark: #6f4a28;
+    --accent-soft: #f0e6da;
+    --green: #2f8f5b;
+    --red: #c0532f;
+    --shadow: 0 1px 3px rgba(43,37,32,.08), 0 8px 24px rgba(43,37,32,.06);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 24px 18px 80px; }
+
+  header.app {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+  }
+  header.app .logo {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    display: grid; place-items: center; font-size: 28px;
+    box-shadow: var(--shadow);
+  }
+  header.app h1 { font-size: 26px; margin: 0; letter-spacing: -.5px; }
+  header.app p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    font-size: 17px; margin: 0 0 16px;
+    display: flex; align-items: center; gap: 8px;
+    letter-spacing: -.2px;
+  }
+  .card h2 .ic { font-size: 19px; }
+  .card .hint { color: var(--muted); font-size: 13px; margin: -8px 0 16px; }
+
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+  input, select {
+    font: inherit; color: var(--ink);
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    width: 100%;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  button {
+    font: inherit; font-weight: 600;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    transition: transform .05s, background .15s, opacity .15s;
+  }
+  button:active { transform: translateY(1px); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-ghost { background: var(--accent-soft); color: var(--accent-dark); }
+  .btn-ghost:hover { background: #e7d8c6; }
+  .btn-icon {
+    background: transparent; color: var(--muted);
+    padding: 6px 8px; border-radius: 8px; font-size: 15px;
+  }
+  .btn-icon:hover { background: var(--accent-soft); color: var(--accent-dark); }
+  .btn-icon.danger:hover { background: #f7e2da; color: var(--red); }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .row .grow { flex: 1 1 160px; }
+
+  .people-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-soft); color: var(--accent-dark);
+    padding: 6px 8px 6px 14px; border-radius: 999px;
+    font-size: 14px; font-weight: 600;
+  }
+  .chip button { background: none; padding: 0; width: 22px; height: 22px; border-radius: 50%; color: var(--accent-dark); opacity:.6; font-size:16px; line-height:1; }
+  .chip button:hover { opacity: 1; background: rgba(0,0,0,.06); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 11px 8px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  td.num, th.num { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  .tot-row td { font-weight: 700; border-top: 2px solid var(--line); border-bottom: none; }
+
+  /* Striche stepper */
+  .stepper { display: inline-flex; align-items: center; gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .stepper button { background: #faf7f2; color: var(--accent-dark); padding: 8px 12px; border-radius: 0; font-size: 16px; }
+  .stepper button:hover { background: var(--accent-soft); }
+  .stepper input { width: 64px; border: none; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; text-align: center; font-weight: 700; }
+  .stepper input:focus { box-shadow: none; }
+
+  .tally { color: var(--accent); font-size: 18px; letter-spacing: 2px; word-break: break-all; min-height: 22px; }
+
+  .settle-list { display: flex; flex-direction: column; gap: 10px; }
+  .settle {
+    display: flex; align-items: center; gap: 10px;
+    background: #faf7f2; border: 1px solid var(--line);
+    border-radius: 12px; padding: 12px 16px; font-size: 15px;
+  }
+  .settle .from { font-weight: 700; }
+  .settle .arrow { color: var(--accent); font-size: 18px; }
+  .settle .to { font-weight: 700; }
+  .settle .amt { margin-left: auto; font-weight: 700; color: var(--accent-dark); background:#fff; padding:4px 12px; border-radius:999px; border:1px solid var(--line); }
+
+  .balance-pos { color: var(--green); font-weight: 700; }
+  .balance-neg { color: var(--red); font-weight: 700; }
+  .balance-zero { color: var(--muted); }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .summary-grid .box { background: #faf7f2; border:1px solid var(--line); border-radius: 12px; padding: 14px; text-align:center; }
+  .summary-grid .box .big { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+  .summary-grid .box .lbl { font-size: 12px; color: var(--muted); margin-top:2px; }
+
+  .empty { color: var(--muted); font-size: 14px; font-style: italic; padding: 8px 0; }
+
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-top: 8px; }
+
+  @media (max-width: 600px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    th.hide-sm, td.hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="app">
+    <div class="logo">☕</div>
+    <div>
+      <h1>Kaffeekasse</h1>
+      <p>Striche zählen, Kosten teilen, fair ausgleichen.</p>
+    </div>
+  </header>
+
+  <!-- PERSONEN -->
+  <section class="card">
+    <h2><span class="ic">👥</span> Kaffeeteam</h2>
+    <p class="hint">Wer trinkt mit? Personen hinzufügen oder entfernen.</p>
+    <div class="row" style="margin-bottom:16px;">
+      <div class="grow">
+        <input id="newPerson" type="text" placeholder="Name eingeben…" autocomplete="off">
+      </div>
+      <button class="btn-primary" onclick="addPerson()">+ Hinzufügen</button>
+    </div>
+    <div id="peopleList" class="people-list"></div>
+  </section>
+
+  <!-- KÄUFE -->
+  <section class="card">
+    <h2><span class="ic">🛒</span> Mitgebrachter Kaffee</h2>
+    <p class="hint">Wer hat Kaffee gekauft, wie viel und was hat es gekostet?</p>
+    <div class="row" style="margin-bottom:16px;">
+      <div class="grow">
+        <label>Wer hat bezahlt?</label>
+        <select id="purchaseWho"></select>
+      </div>
+      <div class="grow">
+        <label>Menge (z.&nbsp;B. Pakete)</label>
+        <input id="purchaseQty" type="text" placeholder="z. B. 2 Pakete" autocomplete="off">
+      </div>
+      <div class="grow">
+        <label>Kosten (€)</label>
+        <input id="purchaseCost" type="number" step="0.01" min="0" placeholder="0,00">
+      </div>
+      <button class="btn-primary" onclick="addPurchase()">+ Eintragen</button>
+    </div>
+    <table id="purchaseTable">
+      <thead>
+        <tr>
+          <th>Wer</th>
+          <th class="hide-sm">Menge</th>
+          <th class="num">Kosten</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="purchaseBody"></tbody>
+    </table>
+  </section>
+
+  <!-- STRICHE -->
+  <section class="card">
+    <h2><span class="ic">✏️</span> Strichliste</h2>
+    <p class="hint">Striche pro Person. Mit +/− zählen oder Zahl direkt eintippen.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Person</th>
+          <th class="hide-sm">Striche</th>
+          <th style="width:1%">Anzahl</th>
+        </tr>
+      </thead>
+      <tbody id="tallyBody"></tbody>
+    </table>
+  </section>
+
+  <!-- AUSWERTUNG -->
+  <section class="card">
+    <h2><span class="ic">🧮</span> Auswertung</h2>
+    <div class="summary-grid" style="margin-bottom:18px;">
+      <div class="box"><div class="big" id="sumCost">0,00 €</div><div class="lbl">Gesamtkosten</div></div>
+      <div class="box"><div class="big" id="sumStrokes">0</div><div class="lbl">Striche gesamt</div></div>
+      <div class="box"><div class="big" id="sumPrice">0,00 €</div><div class="lbl">Preis pro Strich</div></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Person</th>
+          <th class="num">Striche</th>
+          <th class="num hide-sm">Verbrauch</th>
+          <th class="num hide-sm">Bezahlt</th>
+          <th class="num">Saldo</th>
+        </tr>
+      </thead>
+      <tbody id="balanceBody"></tbody>
+      <tfoot id="balanceFoot"></tfoot>
+    </table>
+  </section>
+
+  <!-- AUSGLEICH -->
+  <section class="card">
+    <h2><span class="ic">🤝</span> Ausgleich</h2>
+    <p class="hint">Wer wem wie viel überweist – mit möglichst wenigen Zahlungen.</p>
+    <div id="settleList" class="settle-list"></div>
+  </section>
+
+  <div class="toolbar">
+    <button class="btn-ghost" onclick="resetTally()">Striche zurücksetzen</button>
+    <button class="btn-ghost" onclick="newRound()">Neue Runde (alles leeren)</button>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+const PRESET = ["Sven","Anna","Achim","Matthias","Arthur","Vladimir","Mahsa","Jürgen"];
+const STORE_KEY = "kaffeekasse_v1";
+
+let state = load();
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return {
+    people: PRESET.slice(),
+    strokes: {},          // name -> anzahl
+    purchases: []         // {id, who, qty, cost}
+  };
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function euro(n) {
+  return (Math.round(n * 100) / 100).toLocaleString("de-DE", {minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
+}
+
+/* ---------- Personen ---------- */
+function addPerson() {
+  const inp = document.getElementById("newPerson");
+  const name = inp.value.trim();
+  if (!name) return;
+  if (state.people.some(p => p.toLowerCase() === name.toLowerCase())) {
+    inp.value = ""; return;
+  }
+  state.people.push(name);
+  inp.value = "";
+  save(); render();
+}
+function removePerson(name) {
+  if (!confirm(`„${name}" aus dem Kaffeeteam entfernen?`)) return;
+  state.people = state.people.filter(p => p !== name);
+  delete state.strokes[name];
+  state.purchases = state.purchases.filter(p => p.who !== name);
+  save(); render();
+}
+
+/* ---------- Käufe ---------- */
+function addPurchase() {
+  const who = document.getElementById("purchaseWho").value;
+  const qty = document.getElementById("purchaseQty").value.trim();
+  const cost = parseFloat(document.getElementById("purchaseCost").value);
+  if (!who) { alert("Bitte eine Person auswählen."); return; }
+  if (isNaN(cost) || cost < 0) { alert("Bitte einen gültigen Betrag eingeben."); return; }
+  state.purchases.push({ id: Date.now() + Math.random(), who, qty, cost });
+  document.getElementById("purchaseQty").value = "";
+  document.getElementById("purchaseCost").value = "";
+  save(); render();
+}
+function removePurchase(id) {
+  state.purchases = state.purchases.filter(p => p.id !== id);
+  save(); render();
+}
+
+/* ---------- Striche ---------- */
+function setStroke(name, val) {
+  let n = parseInt(val, 10);
+  if (isNaN(n) || n < 0) n = 0;
+  state.strokes[name] = n;
+  save(); renderSummary();
+  // update only the tally visual + input without full re-render to keep focus
+  const cell = document.getElementById("tally-" + cssId(name));
+  if (cell) cell.innerHTML = tallyMarks(n);
+}
+function bumpStroke(name, delta) {
+  const cur = state.strokes[name] || 0;
+  const next = Math.max(0, cur + delta);
+  state.strokes[name] = next;
+  const inp = document.getElementById("inp-" + cssId(name));
+  if (inp) inp.value = next;
+  const cell = document.getElementById("tally-" + cssId(name));
+  if (cell) cell.innerHTML = tallyMarks(next);
+  save(); renderSummary();
+}
+function resetTally() {
+  if (!confirm("Alle Striche auf 0 setzen?")) return;
+  state.strokes = {};
+  save(); render();
+}
+function newRound() {
+  if (!confirm("Neue Runde starten? Striche und Käufe werden gelöscht (Personen bleiben).")) return;
+  state.strokes = {};
+  state.purchases = [];
+  save(); render();
+}
+
+function tallyMarks(n) {
+  // Gruppen zu 5 (vier Striche + Querstrich), als ║║║║ und durchgestrichene Gruppe
+  if (!n) return "";
+  let out = "";
+  const groups = Math.floor(n / 5);
+  const rest = n % 5;
+  for (let i = 0; i < groups; i++) out += '<span style="border-bottom:2px solid var(--accent);padding-bottom:1px;margin-right:5px;display:inline-block;">||||</span>';
+  out += "|".repeat(rest);
+  return out;
+}
+
+function cssId(name) { return name.replace(/[^a-zA-Z0-9]/g, "_"); }
+
+/* ---------- Ausgleichsberechnung (minimale Zahlungen) ---------- */
+function computeSettlements(balances) {
+  // balances: array of {name, balance}  (positiv = bekommt Geld, negativ = schuldet)
+  const EPS = 0.005;
+  const creditors = balances.filter(b => b.balance > EPS).map(b => ({name:b.name, amt:b.balance}));
+  const debtors  = balances.filter(b => b.balance < -EPS).map(b => ({name:b.name, amt:-b.balance}));
+  creditors.sort((a,b) => b.amt - a.amt);
+  debtors.sort((a,b) => b.amt - a.amt);
+  const result = [];
+  let i = 0, j = 0;
+  while (i < debtors.length && j < creditors.length) {
+    const pay = Math.min(debtors[i].amt, creditors[j].amt);
+    result.push({ from: debtors[i].name, to: creditors[j].name, amount: pay });
+    debtors[i].amt -= pay;
+    creditors[j].amt -= pay;
+    if (debtors[i].amt < EPS) i++;
+    if (creditors[j].amt < EPS) j++;
+  }
+  return result;
+}
+
+/* ---------- Rendering ---------- */
+function render() {
+  renderPeople();
+  renderPurchaseSelect();
+  renderPurchases();
+  renderTally();
+  renderSummary();
+}
+
+function renderPeople() {
+  const el = document.getElementById("peopleList");
+  if (!state.people.length) { el.innerHTML = '<div class="empty">Noch keine Personen.</div>'; return; }
+  el.innerHTML = state.people.map(p =>
+    `<span class="chip">${escapeHtml(p)}<button title="Entfernen" onclick="removePerson('${escapeAttr(p)}')">×</button></span>`
+  ).join("");
+}
+
+function renderPurchaseSelect() {
+  const sel = document.getElementById("purchaseWho");
+  const prev = sel.value;
+  sel.innerHTML = state.people.map(p => `<option value="${escapeAttr(p)}">${escapeHtml(p)}</option>`).join("");
+  if (state.people.includes(prev)) sel.value = prev;
+}
+
+function renderPurchases() {
+  const body = document.getElementById("purchaseBody");
+  if (!state.purchases.length) {
+    body.innerHTML = '<tr><td colspan="4" class="empty">Noch keine Käufe eingetragen.</td></tr>';
+    return;
+  }
+  body.innerHTML = state.purchases.map(p =>
+    `<tr>
+      <td><strong>${escapeHtml(p.who)}</strong></td>
+      <td class="hide-sm">${escapeHtml(p.qty || "–")}</td>
+      <td class="num">${euro(p.cost)}</td>
+      <td class="num"><button class="btn-icon danger" title="Löschen" onclick="removePurchase(${p.id})">🗑</button></td>
+    </tr>`
+  ).join("");
+}
+
+function renderTally() {
+  const body = document.getElementById("tallyBody");
+  if (!state.people.length) {
+    body.innerHTML = '<tr><td colspan="3" class="empty">Erst Personen anlegen.</td></tr>';
+    return;
+  }
+  body.innerHTML = state.people.map(p => {
+    const n = state.strokes[p] || 0;
+    const id = cssId(p);
+    return `<tr>
+      <td><strong>${escapeHtml(p)}</strong></td>
+      <td class="hide-sm"><div class="tally" id="tally-${id}">${tallyMarks(n)}</div></td>
+      <td>
+        <div class="stepper">
+          <button onclick="bumpStroke('${escapeAttr(p)}',-1)">−</button>
+          <input id="inp-${id}" type="number" min="0" value="${n}"
+                 onchange="setStroke('${escapeAttr(p)}', this.value)"
+                 oninput="setStroke('${escapeAttr(p)}', this.value)">
+          <button onclick="bumpStroke('${escapeAttr(p)}',1)">+</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function renderSummary() {
+  const totalCost = state.purchases.reduce((s,p) => s + (p.cost || 0), 0);
+  const totalStrokes = state.people.reduce((s,p) => s + (state.strokes[p] || 0), 0);
+  const pricePer = totalStrokes > 0 ? totalCost / totalStrokes : 0;
+
+  document.getElementById("sumCost").textContent = euro(totalCost);
+  document.getElementById("sumStrokes").textContent = totalStrokes;
+  document.getElementById("sumPrice").textContent = totalStrokes > 0 ? euro(pricePer) : "–";
+
+  // Saldo je Person: bezahlt - verbraucht
+  const paidBy = {};
+  state.purchases.forEach(p => { paidBy[p.who] = (paidBy[p.who] || 0) + (p.cost || 0); });
+
+  const balances = state.people.map(p => {
+    const strokes = state.strokes[p] || 0;
+    const consumed = strokes * pricePer;
+    const paid = paidBy[p] || 0;
+    return { name: p, strokes, consumed, paid, balance: paid - consumed };
+  });
+
+  const body = document.getElementById("balanceBody");
+  body.innerHTML = balances.map(b => {
+    const cls = b.balance > 0.005 ? "balance-pos" : (b.balance < -0.005 ? "balance-neg" : "balance-zero");
+    const sign = b.balance > 0.005 ? "+" : "";
+    return `<tr>
+      <td><strong>${escapeHtml(b.name)}</strong></td>
+      <td class="num">${b.strokes}</td>
+      <td class="num hide-sm">${euro(b.consumed)}</td>
+      <td class="num hide-sm">${euro(b.paid)}</td>
+      <td class="num ${cls}">${sign}${euro(b.balance)}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("balanceFoot").innerHTML =
+    `<tr class="tot-row">
+      <td>Gesamt</td>
+      <td class="num">${totalStrokes}</td>
+      <td class="num hide-sm">${euro(balances.reduce((s,b)=>s+b.consumed,0))}</td>
+      <td class="num hide-sm">${euro(totalCost)}</td>
+      <td class="num">${euro(0)}</td>
+    </tr>`;
+
+  // Ausgleich
+  const settlements = computeSettlements(balances);
+  const sl = document.getElementById("settleList");
+  if (!settlements.length) {
+    sl.innerHTML = '<div class="empty">Nichts auszugleichen – alles im Gleichgewicht. 🎉</div>';
+  } else {
+    sl.innerHTML = settlements.map(s =>
+      `<div class="settle">
+        <span class="from">${escapeHtml(s.from)}</span>
+        <span class="arrow">→</span>
+        <span class="to">${escapeHtml(s.to)}</span>
+        <span class="amt">${euro(s.amount)}</span>
+      </div>`
+    ).join("");
+  }
+}
+
+/* ---------- Utils ---------- */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function escapeAttr(s) {
+  return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/"/g,"&quot;");
+}
+
+document.getElementById("newPerson").addEventListener("keydown", e => { if (e.key === "Enter") addPerson(); });
+document.getElementById("purchaseCost").addEventListener("keydown", e => { if (e.key === "Enter") addPurchase(); });
+
+render();
+</script>
+</body>
+</html>
